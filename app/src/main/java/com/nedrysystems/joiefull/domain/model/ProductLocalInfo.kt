@@ -17,6 +17,11 @@ data class ProductLocalInfo(
     val rate: Double? = null
 ) {
 
+    /**
+     * Converts the current [ProductLocalInfo] instance into a [ProductEntity] for use with the local database.
+     *
+     * @return A [ProductEntity] object containing the same product information.
+     */
     fun toDto(): ProductEntity {
         return ProductEntity(
             id = this.id,
@@ -26,6 +31,13 @@ data class ProductLocalInfo(
         )
     }
 
+    /**
+     * Creates a [ProductLocalInfo] instance from a given [ProductEntity].
+     * This function is used to map a database entity into the local product representation.
+     *
+     * @param productEntity The [ProductEntity] instance to be converted.
+     * @return A new [ProductLocalInfo] object containing the mapped product data.
+     */
     fun fromDto(productEntity: ProductEntity): ProductLocalInfo {
         return ProductLocalInfo(
             id = productEntity.id,

@@ -1,6 +1,5 @@
 package com.nedrysystems.joiefull.data.webservice
 
-import com.nedrysystems.joiefull.domain.model.GetProductApiResponse
 import retrofit2.http.GET
 
 /**

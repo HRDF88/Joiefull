@@ -5,36 +5,68 @@ import com.nedrysystems.joiefull.data.repositoryInterface.GetProductLocalReposit
 import com.nedrysystems.joiefull.domain.model.ProductLocalInfo
 import javax.inject.Inject
 
+/**
+ * Repository class that interacts with the local database (via [ProductDao]) to fetch, insert, update, and manage product data.
+ * It implements the [GetProductLocalRepositoryInterface] and provides methods to interact with local product information.
+ *
+ * @constructor Injects the [ProductDao] instance to perform database operations.
+ *
+ * @param productDao The DAO instance used to interact with the local product data.
+ */
 class GetProductLocalRepository @Inject constructor(
     private val productDao: ProductDao
 ) : GetProductLocalRepositoryInterface {
 
+    /**
+     * Retrieves all local product information from the database.
+     * It maps the result of the DAO's query to a list of [ProductLocalInfo] objects.
+     *
+     * @return A list of [ProductLocalInfo] representing the products retrieved from the local database.
+     */
     override suspend fun getLocalProductInfo(): List<ProductLocalInfo> {
         return productDao.getAllProductsLocalInfo()
             .map { ProductLocalInfo(0).fromDto(it) } // Instanciation d'un objet ProductLocalInfo avant d'appeler fromDto()
     }
 
+    /**
+     * Retrieves the local information of a product by its ID.
+     * It fetches the [ProductEntity] from the database and converts it into a [ProductLocalInfo] object.
+     *
+     * @param id The unique identifier of the product.
+     * @return A [ProductLocalInfo] object containing the product's local information, or null if not found.
+     */
     override suspend fun getProductLocalInfo(id: Int): ProductLocalInfo? {
-        // Récupère le ProductEntity à partir de la base de données
+        // Fetches the ProductEntity from the local database
         val productEntity = productDao.getProductLocalInfo(id)
 
-        // Vérifie si productEntity est non nul et le convertit en ProductLocalInfo
+        // If productEntity is not null, it is converted to ProductLocalInfo
         return productEntity?.let {
-            // Appelle fromDto() sur ProductEntity pour le convertir en ProductLocalInfo
+            // Converts ProductEntity to ProductLocalInfo using a conversion function
             ProductLocalInfo(id = it.id, favorite = it.favorite, rate = it.rate)
         }
     }
 
-    // Ajoute ou met à jour les informations locales d'un produit
+    /**
+     * Inserts or updates a product's local information in the database.
+     * The [ProductLocalInfo] is converted to a [ProductEntity] before being passed to the DAO for insertion or update.
+     *
+     * @param productLocalInfo The product information to insert or update.
+     */
     override suspend fun insertOrUpdateProductLocalInfo(productLocalInfo: ProductLocalInfo) {
-        // Convertir ProductLocalInfo en ProductEntity en utilisant la méthode toDto()
+        // Converts ProductLocalInfo to ProductEntity using the toDto() function
         val productEntity = productLocalInfo.toDto()
 
-        // Appel au DAO pour insérer ou mettre à jour le produit dans la base de données
+        // Calls the DAO to insert or update the product in the local database
         productDao.insertOrUpdateProductLocalInfo(productEntity)
     }
 
-    // Met à jour le statut "favori" d'un produit
+    /**
+     * Updates the "favorite" status of a product in the local database.
+     * This updates the value of the favorite field in the database for the product with the specified ID.
+     *
+     * @param id The unique identifier of the product.
+     * @param favorite The new favorite status to set for the product.
+     */
     override suspend fun updateFavoriteStatus(id: Int, favorite: Boolean) {
         productDao.updateFavoriteStatus(id, favorite)
     }
