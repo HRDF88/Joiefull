@@ -1,5 +1,6 @@
 package com.nedrysystems.joiefull.ui.mapper
 
+import android.util.Log
 import com.nedrysystems.joiefull.data.webservice.GetProductApiResponse
 import com.nedrysystems.joiefull.domain.model.ProductLocalInfo
 import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
@@ -26,6 +27,7 @@ class ProductUIMapper {
         apiResponse: GetProductApiResponse,
         localInfo: ProductLocalInfo?
     ): ProductUiModel {
+        Log.d("ProductMapping", "Mapping product: ${apiResponse.name}, Price: ${apiResponse.price}, Original Price: ${apiResponse.originalPrice}, Favorite: ${localInfo?.favorite}, Rate: ${localInfo?.rate}")
         return ProductUiModel(
             id = apiResponse.id,
             picture = apiResponse.picture,
@@ -33,7 +35,7 @@ class ProductUIMapper {
             category = apiResponse.category,
             likes = apiResponse.likes,
             price = apiResponse.price,
-            original_Price = apiResponse.original_Price,
+            originalPrice = apiResponse.originalPrice,
             favorite = localInfo?.favorite ?: false, // Default value is false if localInfo is null
             rate = localInfo?.rate // This can be null if no local rating is provided
         )

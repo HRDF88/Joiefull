@@ -87,16 +87,19 @@ open class HomeViewModel @Inject constructor(
      * @return A list of [ProductUiModel] representing the merged products.
      */
     private suspend fun getProducts(): List<ProductUiModel> {
-        val productUiModels = mutableListOf<ProductUiModel>()
+        mutableListOf<ProductUiModel>()
         val productUIMapper = ProductUIMapper()
 
         return try {
             // Fetch products from the API
             val apiProducts = getProductUseCase.invoke()
+            Log.d("HomeViewModel", "API Products: ${apiProducts.size}") // Log pour vérifier les produits API
 
             // Fetch local products
             val localProducts = getLocalProductInfoUseCase.execute()
+            Log.d("HomeViewModel", "Local Products: ${localProducts.size}") // Log pour vérifier les produits locaux
             val localProductsMap = localProducts.associateBy { it.id }
+
 
             // Merge API and local data
             apiProducts.map { apiProduct ->
@@ -115,6 +118,7 @@ open class HomeViewModel @Inject constructor(
 
                 // Map API and local data to a ProductUiModel
                 productUIMapper.mapToUiModel(apiProduct, localProduct)
+
             }
         } catch (exception: Exception) {
             // In case of failure, update UI state with error
@@ -133,13 +137,12 @@ open class HomeViewModel @Inject constructor(
                     category = "Inconnu", // Default category
                     likes = 0, // No information on likes
                     price = 0.0, // Default price
-                    original_Price = null, // No original price
+                    originalPrice = null, // No original price
                     favorite = localProduct.favorite,
                     rate = localProduct.rate
                 )
             }
         }
 
-        return productUiModels
     }
 }

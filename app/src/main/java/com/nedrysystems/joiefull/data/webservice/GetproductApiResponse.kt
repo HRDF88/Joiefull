@@ -1,4 +1,5 @@
 package com.nedrysystems.joiefull.data.webservice
+import com.squareup.moshi.Json
 
 /**
  * Represents the response from the API for a product.
@@ -9,7 +10,7 @@ package com.nedrysystems.joiefull.data.webservice
  * @property category The category to which the product belongs.
  * @property likes The number of likes the product has received.
  * @property price The current price of the product.
- * @property original_Price The original price of the product, if available (nullable).
+ * @property originalPrice The original price of the product, if available (nullable).
  */
 data class GetProductApiResponse(
     val id: Int,
@@ -18,7 +19,8 @@ data class GetProductApiResponse(
     val category: String,
     val likes: Int,
     val price: Double,
-    val original_Price: Double?
+    @Json(name = "original_price")
+    val originalPrice: Double?
 )
 
 /**

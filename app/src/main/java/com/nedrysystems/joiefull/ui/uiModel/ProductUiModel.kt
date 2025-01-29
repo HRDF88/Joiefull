@@ -13,7 +13,7 @@ import com.nedrysystems.joiefull.data.webservice.PictureApiResponse
  * @property category The category to which the product belongs.
  * @property likes The number of likes the product has received.
  * @property price The current price of the product.
- * @property original_Price The original price of the product, which may be null if not available.
+ * @property originalPrice The original price of the product, which may be null if not available.
  * @property favorite A boolean indicating whether the product is marked as a favorite by the user. Defaults to false.
  * @property rate The rating of the product, which may be null if no rating is provided.
  */
@@ -24,7 +24,7 @@ data class ProductUiModel(
     val category: String,
     val likes: Int,
     val price: Double,
-    val original_Price: Double?,
+    val originalPrice: Double?,
     val favorite: Boolean = false,
     val rate: Double? = null
 )
