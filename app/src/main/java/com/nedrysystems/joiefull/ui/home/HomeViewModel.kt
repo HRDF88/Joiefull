@@ -8,7 +8,9 @@ import com.nedrysystems.joiefull.domain.model.ProductLocalInfo
 import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
 import com.nedrysystems.joiefull.domain.usecase.productApi.GetProductUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.GetLocalProductInfoUseCase
+import com.nedrysystems.joiefull.domain.usecase.productLocal.GetProductLocalInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.InsertOrUpdateProductLocalInfoUseCase
+import com.nedrysystems.joiefull.domain.usecase.productLocal.UpdateFavoriteStatusUseCase
 import com.nedrysystems.joiefull.ui.mapper.ProductUIMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +34,9 @@ import javax.inject.Inject
 open class HomeViewModel @Inject constructor(
     private val getProductUseCase: GetProductUseCase,
     private val getLocalProductInfoUseCase: GetLocalProductInfoUseCase,
-    private val insertOrUpdateProductLocalInfoUseCase: InsertOrUpdateProductLocalInfoUseCase
+    private val insertOrUpdateProductLocalInfoUseCase: InsertOrUpdateProductLocalInfoUseCase,
+    private val updateFavoriteStatusUseCase: UpdateFavoriteStatusUseCase,
+    private val getProductLocalInfoUseCase: GetProductLocalInfoUseCase
 ) : ViewModel() {
 
     // Holds the current state of the UI, including products, loading status, and error messages.
@@ -93,11 +97,17 @@ open class HomeViewModel @Inject constructor(
         return try {
             // Fetch products from the API
             val apiProducts = getProductUseCase.invoke()
-            Log.d("HomeViewModel", "API Products: ${apiProducts.size}") // Log pour vérifier les produits API
+            Log.d(
+                "HomeViewModel",
+                "API Products: ${apiProducts.size}"
+            ) // Log pour vérifier les produits API
 
             // Fetch local products
             val localProducts = getLocalProductInfoUseCase.execute()
-            Log.d("HomeViewModel", "Local Products: ${localProducts.size}") // Log pour vérifier les produits locaux
+            Log.d(
+                "HomeViewModel",
+                "Local Products: ${localProducts.size}"
+            ) // Log pour vérifier les produits locaux
             val localProductsMap = localProducts.associateBy { it.id }
 
 
@@ -145,4 +155,55 @@ open class HomeViewModel @Inject constructor(
         }
 
     }
+
+    /**
+     * Toggles the favorite status of a product. This method will change the "favorite" status of the specified product
+     * and update both the local UI state and the database with the new status. It also handles error cases by logging
+     * the error and updating the UI state with an error message.
+     *
+     * The function performs the following steps:
+     * 1. It toggles the favorite status of the given product.
+     * 2. It logs the product's information before updating the status.
+     * 3. It updates the favorite status of the product in the database using the [updateFavoriteStatusUseCase].
+     * 4. After updating the database, it fetches the updated product information using the [getProductLocalInfoUseCase].
+     * 5. It updates the UI state with the new list of products, reflecting the toggled favorite status.
+     * 6. In case of an error, it logs the exception and updates the UI state with an error message.
+     *
+     * @param product The [ProductUiModel] whose favorite status is to be toggled.
+     */
+    fun toggleFavorite(product: ProductUiModel) {
+        viewModelScope.launch {
+            try {
+                // Toggle the favorite status of the product
+                val newFavoriteStatus = !product.favorite
+
+                // Log product details before updating
+                Log.d(
+                    "HomeViewModel",
+                    "Avant mise à jour: ${product.id} - Favori: ${product.favorite}"
+                )
+
+                // Update the favorite status in the database using the UseCase
+                updateFavoriteStatusUseCase.execute(product.id, newFavoriteStatus)
+
+                // Retrieve the updated product from local storage
+                val updatedProduct = getProductLocalInfoUseCase.execute(product.id)
+                Log.d("HomeViewModel", "Produit récupéré après mise à jour: $updatedProduct")
+
+                // Update the local UI state with the new favorite status
+                val updatedProducts = _uiState.value.products.map {
+                    if (it.id == product.id) it.copy(favorite = newFavoriteStatus) else it
+                }
+
+                // Update the UI state with the modified product list
+                _uiState.value = _uiState.value.copy(products = updatedProducts)
+
+            } catch (e: Exception) {
+                // Handle errors
+                Log.e("HomeViewModel", "Erreur lors de la mise à jour du favori", e)
+                _uiState.value = _uiState.value.copy(error = "Impossible de mettre en favori")
+            }
+        }
+    }
+
 }

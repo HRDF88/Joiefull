@@ -1,5 +1,6 @@
 package com.nedrysystems.joiefull.domain.usecase.productLocal
 
+import android.util.Log
 import com.nedrysystems.joiefull.data.repositoryInterface.GetProductLocalRepositoryInterface
 import javax.inject.Inject
 
@@ -23,6 +24,8 @@ class UpdateFavoriteStatusUseCase @Inject constructor(
      * @param favorite A boolean indicating whether the product is marked as a favorite.
      */
     suspend fun execute(id: Int, favorite: Boolean) {
+        Log.d("FavoriteStatusUseCase", "Mise à jour du produit ID: $id, Favori: $favorite")
         getProductLocalRepositoryInterface.updateFavoriteStatus(id, favorite)
+        Log.d("FavoriteStatusUseCase", "Produit avec ID $id a été mis à jour dans la base de données")
     }
 }
