@@ -55,6 +55,10 @@ dependencies {
     implementation("androidx.compose.foundation:foundation-layout-android:1.7.4")
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.play.services.analytics.impl)
+    implementation(libs.androidx.runtime.livedata)
     // Room
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
@@ -75,6 +79,11 @@ dependencies {
 
     //Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
+    // Hilt dependencies
+    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+
+
+
 
 
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
@@ -88,6 +97,7 @@ dependencies {
     implementation ("androidx.compose.ui:ui-tooling-preview:1.5.0")
     implementation ("androidx.activity:activity-compose:1.7.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0")
+    implementation ("androidx.navigation:navigation-compose:2.6.0")
 
     // Pour les annotations de Compose
     implementation ("androidx.compose.runtime:runtime:1.5.0")

@@ -1,17 +1,18 @@
 package com.nedrysystems.joiefull.ui.home
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nedrysystems.joiefull.data.webservice.PictureApiResponse
 import com.nedrysystems.joiefull.domain.model.ProductLocalInfo
-import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
 import com.nedrysystems.joiefull.domain.usecase.productApi.GetProductUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.GetLocalProductInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.GetProductLocalInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.InsertOrUpdateProductLocalInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.UpdateFavoriteStatusUseCase
 import com.nedrysystems.joiefull.ui.mapper.ProductUIMapper
+import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +37,8 @@ open class HomeViewModel @Inject constructor(
     private val getLocalProductInfoUseCase: GetLocalProductInfoUseCase,
     private val insertOrUpdateProductLocalInfoUseCase: InsertOrUpdateProductLocalInfoUseCase,
     private val updateFavoriteStatusUseCase: UpdateFavoriteStatusUseCase,
-    private val getProductLocalInfoUseCase: GetProductLocalInfoUseCase
+    private val getProductLocalInfoUseCase: GetProductLocalInfoUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     // Holds the current state of the UI, including products, loading status, and error messages.
@@ -46,7 +48,17 @@ open class HomeViewModel @Inject constructor(
     // Fetches products when the ViewModel is initialized.
     init {
         fetchProducts()
+
+        // Listen if a product has been updated from DetailScreen
+        savedStateHandle.getLiveData<Int>("updatedProductId").observeForever { productId ->
+            if (productId != null) {
+                updateProductState(productId)
+            }
+        }
     }
+
+    private val _productState = MutableStateFlow<ProductUiModel?>(null)
+    val productState: StateFlow<ProductUiModel?> = _productState.asStateFlow()
 
     /**
      * Updates the UI state to show the provided error message.
@@ -161,14 +173,6 @@ open class HomeViewModel @Inject constructor(
      * and update both the local UI state and the database with the new status. It also handles error cases by logging
      * the error and updating the UI state with an error message.
      *
-     * The function performs the following steps:
-     * 1. It toggles the favorite status of the given product.
-     * 2. It logs the product's information before updating the status.
-     * 3. It updates the favorite status of the product in the database using the [updateFavoriteStatusUseCase].
-     * 4. After updating the database, it fetches the updated product information using the [getProductLocalInfoUseCase].
-     * 5. It updates the UI state with the new list of products, reflecting the toggled favorite status.
-     * 6. In case of an error, it logs the exception and updates the UI state with an error message.
-     *
      * @param product The [ProductUiModel] whose favorite status is to be toggled.
      */
     fun toggleFavorite(product: ProductUiModel) {
@@ -190,7 +194,10 @@ open class HomeViewModel @Inject constructor(
                 val updatedProduct = getProductLocalInfoUseCase.execute(product.id)
                 Log.d("HomeViewModel", "Produit récupéré après mise à jour: $updatedProduct")
 
-                // Update the local UI state with the new favorite status
+                // Update _productState to also include likes
+                _productState.value = _productState.value?.copy(favorite = newFavoriteStatus)
+
+                //Updating _uiState.products
                 val updatedProducts = _uiState.value.products.map {
                     if (it.id == product.id) it.copy(favorite = newFavoriteStatus) else it
                 }
@@ -206,4 +213,48 @@ open class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Updates the state of a product after an update has occurred in another screen (such as DetailScreen).
+     * This function retrieves the updated product from local storage and reflects the changes in the UI state.
+     *
+     * @param productId The ID of the product to update in the UI state.
+     */
+    private fun updateProductState(productId: Int) {
+        viewModelScope.launch {
+            try {
+                val updatedProduct = getProductLocalInfoUseCase.execute(productId)
+
+                // Update_uiState.products`
+                _uiState.update { state ->
+                    val updatedProducts = state.products.map {
+                        if (it.id == productId) updatedProduct?.let { it1 ->
+                            it.copy(
+                                favorite = it1.favorite,
+                                likes = if (updatedProduct.favorite) it.likes + 1 else it.likes - 1
+                            )
+                        } else it
+                    }.filterNotNull()
+                    state.copy(products = updatedProducts)
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Erreur lors de la mise à jour du produit", e)
+            }
+        }
+    }
+
+    /**
+     * Refreshes the list of products by re-fetching them.
+     */
+    fun refreshProducts() {
+        viewModelScope.launch {
+            fetchProducts()  // Call the function to retrieve the products again
+        }
+    }
 }
+
+
+
+
+
+
+
