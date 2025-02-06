@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 
 /**
@@ -61,10 +62,12 @@ fun ReviewSection(
             Image(
                 painter = profileImage,
                 contentDescription = "Profile Picture",
+                contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
                     .border(1.dp, Color.Gray, CircleShape)
+
             )
 
             Spacer(modifier = Modifier.width(8.dp))

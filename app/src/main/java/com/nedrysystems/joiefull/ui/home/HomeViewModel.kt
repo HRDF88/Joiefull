@@ -61,23 +61,6 @@ open class HomeViewModel @Inject constructor(
     val productState: StateFlow<ProductUiModel?> = _productState.asStateFlow()
 
     /**
-     * Updates the UI state to show the provided error message.
-     *
-     * @param errorMessage The error message to display.
-     */
-    private fun onError(errorMessage: String) {
-        Log.e("AddCandidateViewModel", errorMessage)
-        _uiState.update { currentState -> currentState.copy(error = errorMessage) }
-    }
-
-    /**
-     * Resets the error state after the error has been processed or acknowledged.
-     */
-    fun updateErrorState() {
-        _uiState.update { currentState -> currentState.copy(error = "") }
-    }
-
-    /**
      * Fetches products from both the API and local storage, merging them into a single list.
      * Handles loading and error states during the process.
      */

@@ -1,7 +1,9 @@
 package com.nedrysystems.joiefull.ui.detail
 
+import android.app.Activity
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -42,6 +46,7 @@ import androidx.navigation.NavHostController
 import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.ui.component.ProductCard
 import com.nedrysystems.joiefull.ui.component.ReviewSection
+import com.nedrysystems.joiefull.ui.component.SaveButton
 import com.nedrysystems.joiefull.utils.image.imageInterface.ImageLoader
 
 import javax.inject.Inject
@@ -145,89 +150,116 @@ class DetailLayout @Inject constructor(
         val shareContent by detailViewModel.shareContent.observeAsState()
         val context = LocalContext.current
 
-        Column(
+        // Callback for SaveButton
+        val saveButtonClick: () -> Unit = {
+            if (rating == 0 || comment.isEmpty()) { // Checks if the rating is 0 or if the comment is empty
+                // Show a Toast if no note is selected or the comment is empty
+                Toast.makeText(
+                    context,
+                    "Merci de laisser une note et un commentaire",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                // Run the saveReviewAndUpdateProductRating function with the appropriate parameters if everything is valid
+                detailViewModel.saveReviewAndUpdateProductRating(1, productId, rating, comment)
+                // Show a Toast to inform user about success
+                Toast.makeText(context, "Avis enregistré avec succès", Toast.LENGTH_SHORT).show()
+                // return to Home
+                navController.popBackStack()
+            }
+        }
+
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .background(Color.White)
         ) {
-            Box {
-                // Product details and like button
-                ProductCard(
-                    product = product,
-                    imageLoader = imageLoader,
-                    likeCount = likeCount,
-                    onProductClick = {},
-                    onLikeClick = onLikeClick,
-                    imageModifier = Modifier.height(535.dp),
-                    boxModifier = Modifier.height(535.dp),
-                    textStyle = TextStyle(fontSize = 18.sp)
-                )
-                // Icons positioned at the top of the ProductCard
+            item {
+                Box {
+                    // Product details and like button
+                    ProductCard(
+                        product = product,
+                        imageLoader = imageLoader,
+                        likeCount = likeCount,
+                        onProductClick = {},
+                        onLikeClick = onLikeClick,
+                        imageModifier = Modifier.height(500.dp),
+                        boxModifier = Modifier.height(500.dp),
+                        textStyle = TextStyle(fontSize = 18.sp),
+                        starModifier = Modifier.size(24.dp),
+                        cardElevation = 0.dp
+                    )
+                    // Icons positioned at the top of the ProductCard
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopStart)
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Retour",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        IconButton(onClick = {
+                            detailViewModel.prepareShareContent(product)
+                            (context as? Activity)?.recreate()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Share,
+                                contentDescription = "Partager",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+
+
+                // Observe shareContent and launch share intent
+                shareContent?.let { shareText ->
+                    LaunchedEffect(shareText) {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Partager via"))
+                    }
+                }
+
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.TopStart)
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Retour",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    IconButton(onClick = { detailViewModel.prepareShareContent(product) }) {
-                        Icon(
-                            imageVector = Icons.Filled.Share,
-                            contentDescription = "Partager",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-            }
-
-
-            // Observe shareContent and launch share intent
-            shareContent?.let { shareText ->
-                LaunchedEffect(shareText) {
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, shareText)
-                    }
-                    context.startActivity(Intent.createChooser(intent, "Partager via"))
-                }
-            }
-
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .background(Color.White)
-                    .wrapContentHeight(),
-            )
-            {
-                Text(
-                    text = product.picture.description,
-                    textAlign = TextAlign.Start,
-                    fontSize = 18.sp,
+                        .padding(8.dp)
+                        .background(Color.White)
+                        .wrapContentHeight(),
                 )
-            }
+                {
+                    Text(
+                        text = product.picture.description,
+                        textAlign = TextAlign.Start,
+                        fontSize = 18.sp,
+                    )
+                }
 
-            // Review section where users can submit a rating and comment
-            if (profileImage != null) {
-                ReviewSection(
-                    profileImage = profileImage,
-                    rating = rating,
-                    onRatingChanged = { newRating ->
-                        Log.d("RatingUpdate", "Nouvelle note dans Render: $newRating")
-                        rating = newRating
-                    },
-                    comment = comment,
-                    onCommentChanged = { newComment -> comment = newComment }
-                )
+                // Review section where users can submit a rating and comment
+                if (profileImage != null) {
+                    ReviewSection(
+                        profileImage = profileImage,
+                        rating = rating,
+                        onRatingChanged = { newRating ->
+                            Log.d("RatingUpdate", "Nouvelle note dans Render: $newRating")
+                            rating = newRating
+                        },
+                        comment = comment,
+                        onCommentChanged = { newComment -> comment = newComment }
+                    )
+                }
+                SaveButton(saveButtonClick = saveButtonClick, modifier = Modifier.fillMaxWidth())
             }
         }
     }

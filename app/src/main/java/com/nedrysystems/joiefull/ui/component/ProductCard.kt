@@ -28,6 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nedrysystems.joiefull.R
@@ -52,7 +53,9 @@ fun ProductCard(
     modifier: Modifier = Modifier,
     boxModifier: Modifier = Modifier,
     imageModifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle(fontSize = 12.sp)
+    textStyle: TextStyle = TextStyle(fontSize = 12.sp),
+    starModifier : Modifier = Modifier,
+    cardElevation: Dp = 4.dp
 ) {
     // Product card layout
     Card(
@@ -60,7 +63,7 @@ fun ProductCard(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .wrapContentHeight(),
-        elevation = 4.dp,
+        elevation = cardElevation,
 
 
         ) {
@@ -99,6 +102,7 @@ fun ProductCard(
                         likeCount = likeCount,
                         isLiked = product.favorite, // Use current 'isLiked' state
                         onLikeClick = onLikeClick
+
                     )
                 }
             }
@@ -121,12 +125,13 @@ fun ProductCard(
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = "Star",
-                        tint = Color.Yellow,
-                        modifier = Modifier.size(16.dp)
+                        tint = Color(0xFFCDA434),
+                        modifier = starModifier.size(14.dp)
+                            .align(Alignment.Bottom)
                     )
                 } else {
 
-                    Spacer(modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.size(0.dp))
                 }
 
                 Text(

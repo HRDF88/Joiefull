@@ -13,6 +13,8 @@ import com.nedrysystems.joiefull.domain.usecase.productLocal.GetLocalProductInfo
 import com.nedrysystems.joiefull.domain.usecase.productLocal.GetProductLocalInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.InsertOrUpdateProductLocalInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.UpdateFavoriteStatusUseCase
+import com.nedrysystems.joiefull.domain.usecase.review.AddOrUpdateReviewUseCase
+import com.nedrysystems.joiefull.domain.usecase.review.UpdateProductRatingUseCase
 import com.nedrysystems.joiefull.domain.usecase.user.GetUserByIdUseCase
 import com.nedrysystems.joiefull.ui.mapper.ProductUIMapper
 import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
@@ -43,7 +45,9 @@ class DetailViewModel @Inject constructor(
     private val insertOrUpdateProductLocalInfoUseCase: InsertOrUpdateProductLocalInfoUseCase,
     private val updateFavoriteStatusUseCase: UpdateFavoriteStatusUseCase,
     private val getProductLocalInfoUseCase: GetProductLocalInfoUseCase,
-    private val getUserByIdUseCase: GetUserByIdUseCase
+    private val getUserByIdUseCase: GetUserByIdUseCase,
+    private val addOrUpdateReviewUseCase: AddOrUpdateReviewUseCase,
+    private val updateProductRatingUseCase: UpdateProductRatingUseCase
 ) : ViewModel() {
 
     /**
@@ -217,7 +221,7 @@ class DetailViewModel @Inject constructor(
      * @property _shareContent A mutable state that holds the prepared shareable content.
      */
     fun prepareShareContent(product: ProductUiModel) {
-        val text = "Découvrez ce produit : ${product.name}"
+        val text = "Découvrez ce produit : ${product.name}, Lien : www.joiefull/[${product.name}].com, ${product.picture.url}"
         _shareContent.value = text
     }
 
@@ -247,5 +251,44 @@ class DetailViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Saves or updates a review and updates the product's rating accordingly.
+     *
+     * This method performs the following steps:
+     * 1. Saves or updates the user's review for the given product.
+     * 2. (Optional) Calculates the new average rating for the product.
+     * 3. Updates the product's rating with the newly calculated value.
+     *
+     * @param userId The ID of the user submitting the review.
+     * @param productId The ID of the product being reviewed.
+     * @param rate The rating given by the user.
+     * @param comment The review comment provided by the user.
+     */
+    fun saveReviewAndUpdateProductRating(
+        userId: Int,
+        productId: Int,
+        rate: Int,
+        comment: String
+    ) {
+        viewModelScope.launch {
+            try {
+                // 1. Save or update the review
+                addOrUpdateReviewUseCase.execute(userId, productId, rate, comment)
+
+                // 2. Val to calculate the new average rating for the product (in the future)
+                val newRate = rate
+
+                // 3. Update the product's rating
+                updateProductRatingUseCase.execute(productId, newRate)
+
+            } catch (e: Exception) {
+                // Handle errors
+                Log.e("DetailViewModel", "Error saving review or updating product rating", e)
+                _uiState.value = DetailUiState(error = "Error saving review or updating product rating")
+            }
+        }
+    }
 }
+
 
