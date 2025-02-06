@@ -26,5 +26,5 @@ data class ProductUiModel(
     val price: Double,
     val originalPrice: Double?,
     val favorite: Boolean = false,
-    val rate: Double? = null
+    val rate: Int? = null
 )

@@ -14,7 +14,7 @@ import com.nedrysystems.joiefull.data.entity.ProductEntity
 data class ProductLocalInfo(
     val id: Int,
     val favorite: Boolean = false,
-    val rate: Double? = null
+    val rate: Int? = null
 ) {
 
     /**

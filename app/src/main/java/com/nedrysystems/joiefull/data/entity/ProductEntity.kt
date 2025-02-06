@@ -17,7 +17,7 @@ data class ProductEntity(
     @PrimaryKey
     val id: Int,
     val favorite: Boolean = false,
-    val rate: Double? = null
+    val rate: Int? = null
 
 )
 

@@ -79,9 +79,10 @@ class DetailLayout @Inject constructor(
         val productState by detailViewModel.productState.collectAsState()
         val uiState by detailViewModel.uiState.collectAsState()
 
-        // Fetch product details when the screen is launched
+        // Fetch product details and user's profile picture when the screen is launched
         LaunchedEffect(productId) {
             detailViewModel.fetchProductDetails(productId)
+            detailViewModel.getUserAndUpdateState()
         }
 
         // Show loading indicator if data is still loading
@@ -99,6 +100,7 @@ class DetailLayout @Inject constructor(
 
         // Retrieve the product from state
         val product = productState
+        val user = uiState.user
 
         // Show message if product is not found
         if (product == null) {
@@ -129,7 +131,14 @@ class DetailLayout @Inject constructor(
             isLiked = updatedFavoriteStatus
         }
 
-        val profileImage = painterResource(id = R.drawable.esprits_criminels_)
+        // user's profile image
+        val profileImage = user?.let {
+            imageLoader.loadImagePainter(
+                url = it.picture,
+                placeholder = R.drawable.error,
+                error = R.drawable.error
+            )
+        }
 
         Log.d("RatingUpdate", "Note actuelle dans Render: $rating")
 
@@ -208,16 +217,18 @@ class DetailLayout @Inject constructor(
             }
 
             // Review section where users can submit a rating and comment
-            ReviewSection(
-                profileImage = profileImage,
-                rating = rating,
-                onRatingChanged = { newRating ->
-                    Log.d("RatingUpdate", "Nouvelle note dans Render: $newRating")
-                    rating = newRating
-                },
-                comment = comment,
-                onCommentChanged = { newComment -> comment = newComment }
-            )
+            if (profileImage != null) {
+                ReviewSection(
+                    profileImage = profileImage,
+                    rating = rating,
+                    onRatingChanged = { newRating ->
+                        Log.d("RatingUpdate", "Nouvelle note dans Render: $newRating")
+                        rating = newRating
+                    },
+                    comment = comment,
+                    onCommentChanged = { newComment -> comment = newComment }
+                )
+            }
         }
     }
 }

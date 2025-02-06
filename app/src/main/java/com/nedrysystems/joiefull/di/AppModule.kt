@@ -3,11 +3,17 @@ package com.nedrysystems.joiefull.di
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.nedrysystems.joiefull.data.dao.ProductDao
+import com.nedrysystems.joiefull.data.dao.ReviewDao
+import com.nedrysystems.joiefull.data.dao.UserDao
 import com.nedrysystems.joiefull.data.database.AppDatabase
 import com.nedrysystems.joiefull.data.repository.GetProductApiRepositoryApi
 import com.nedrysystems.joiefull.data.repository.GetProductLocalRepository
+import com.nedrysystems.joiefull.data.repository.ReviewRepository
+import com.nedrysystems.joiefull.data.repository.UserRepository
 import com.nedrysystems.joiefull.data.repositoryInterface.GetProductLocalRepositoryInterface
 import com.nedrysystems.joiefull.data.repositoryInterface.GetProductRepositoryApiInterface
+import com.nedrysystems.joiefull.data.repositoryInterface.ReviewRepositoryInterface
+import com.nedrysystems.joiefull.data.repositoryInterface.UserRepositoryInterface
 import com.nedrysystems.joiefull.data.webservice.GetProductApiService
 import com.nedrysystems.joiefull.ui.home.HomeViewModel
 import dagger.Binds
@@ -66,6 +72,28 @@ class AppModule {
     }
 
     /**
+     * Provides the [UserDao] instance from the [AppDatabase].
+     *
+     * @param appDatabase The [AppDatabase] instance from which the DAO is retrieved.
+     * @return A singleton instance of [UserDao].
+     */
+    @Provides
+    fun provideUserDao(appDatabase: AppDatabase): UserDao {
+        return appDatabase.userDao()
+    }
+
+    /**
+     * Provides the [ReviewDao] instance from the [AppDatabase].
+     *
+     * @param appDatabase The [AppDatabase] instance from which the DAO is retrieved.
+     * @return A singleton instance of [ReviewDao].
+     */
+    @Provides
+    fun provideReviewDao(appDatabase: AppDatabase): ReviewDao {
+        return appDatabase.reviewDao()
+    }
+
+    /**
      * Provides an implementation of [GetProductRepositoryApiInterface].
      * Uses the [GetProductApiService] to initialize the [GetProductApiRepositoryApi].
      *
@@ -89,6 +117,32 @@ class AppModule {
     @Singleton
     fun provideGetProductLocalRepository(productDao: ProductDao): GetProductLocalRepositoryInterface {
         return GetProductLocalRepository(productDao)
+    }
+
+    /**
+     * Provides an implementation of [ReviewRepositoryInterface].
+     * Uses the [ReviewDao] to initialize the [ReviewRepository].
+     *
+     * @param reviewDao The DAO used for interacting with the local database.
+     * @return A singleton instance of [ReviewRepositoryInterface].
+     */
+    @Provides
+    @Singleton
+    fun provideReviewRepository(reviewDao: ReviewDao): ReviewRepositoryInterface {
+        return ReviewRepository(reviewDao)
+    }
+
+    /**
+     * Provides an implementation of [UserRepositoryInterface].
+     * Uses the [UserDao] to initialize the [UserRepository].
+     *
+     * @param userDao The DAO used for interacting with the local database.
+     * @return A singleton instance of [UserRepositoryInterface].
+     */
+    @Provides
+    @Singleton
+    fun provideUserRepository(userDao: UserDao): UserRepositoryInterface {
+        return UserRepository(userDao)
     }
 
     /**

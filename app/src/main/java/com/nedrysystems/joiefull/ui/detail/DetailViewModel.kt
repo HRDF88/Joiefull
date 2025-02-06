@@ -7,11 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nedrysystems.joiefull.data.webservice.PictureApiResponse
 import com.nedrysystems.joiefull.domain.model.ProductLocalInfo
+import com.nedrysystems.joiefull.domain.model.User
 import com.nedrysystems.joiefull.domain.usecase.productApi.GetProductUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.GetLocalProductInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.GetProductLocalInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.InsertOrUpdateProductLocalInfoUseCase
 import com.nedrysystems.joiefull.domain.usecase.productLocal.UpdateFavoriteStatusUseCase
+import com.nedrysystems.joiefull.domain.usecase.user.GetUserByIdUseCase
 import com.nedrysystems.joiefull.ui.mapper.ProductUIMapper
 import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,7 +42,8 @@ class DetailViewModel @Inject constructor(
     private val getLocalProductInfoUseCase: GetLocalProductInfoUseCase,
     private val insertOrUpdateProductLocalInfoUseCase: InsertOrUpdateProductLocalInfoUseCase,
     private val updateFavoriteStatusUseCase: UpdateFavoriteStatusUseCase,
-    private val getProductLocalInfoUseCase: GetProductLocalInfoUseCase
+    private val getProductLocalInfoUseCase: GetProductLocalInfoUseCase,
+    private val getUserByIdUseCase: GetUserByIdUseCase
 ) : ViewModel() {
 
     /**
@@ -217,6 +220,32 @@ class DetailViewModel @Inject constructor(
         val text = "Découvrez ce produit : ${product.name}"
         _shareContent.value = text
     }
-}
 
+    /**
+     * Fetches the user with ID 1 and updates the UI state with the user data.
+     * If the user is found, the UI state will be updated with the user and loading status set to false.
+     * If the user is not found, the UI state will be updated with a default user and an error message.
+     */
+    fun getUserAndUpdateState() {
+        viewModelScope.launch {
+            // Catch user with Id 1
+            val user = getUserByIdUseCase.execute(1)
+
+            if (user != null) {
+                // if user exist in database cath user in UIState user
+                _uiState.value = DetailUiState(
+                    user = user,
+                    isLoading = false
+                )
+            } else {
+                // if user don't exist, handle error
+                _uiState.value = DetailUiState(
+                    user = User(id = 0, name = "Unknown", picture = ""),
+                    isLoading = false,
+                    error = "User not found"
+                )
+            }
+        }
+    }
+}
 

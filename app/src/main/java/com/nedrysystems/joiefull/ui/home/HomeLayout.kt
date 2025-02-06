@@ -140,7 +140,6 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                         }
 
                                         val onProductClick: () -> Unit = {
-                                            Log.d("ClickTest", "Produit cliqué: ${product.id}")
                                             navController.navigate("productDetail/${product.id}")
                                         }
 
