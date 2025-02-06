@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nedrysystems.joiefull.R
+import com.nedrysystems.joiefull.ui.theme.joiefullBackground
 import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
 import com.nedrysystems.joiefull.utils.image.imageInterface.ImageLoader
 
@@ -125,7 +126,7 @@ fun ProductCard(
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = "Star",
-                        tint = Color(0xFFCDA434),
+                        tint = joiefullBackground,
                         modifier = starModifier.size(14.dp)
                             .align(Alignment.Bottom)
                     )

@@ -47,6 +47,7 @@ import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.ui.component.ProductCard
 import com.nedrysystems.joiefull.ui.component.ReviewSection
 import com.nedrysystems.joiefull.ui.component.SaveButton
+import com.nedrysystems.joiefull.ui.theme.joiefullBackground
 import com.nedrysystems.joiefull.utils.image.imageInterface.ImageLoader
 
 import javax.inject.Inject

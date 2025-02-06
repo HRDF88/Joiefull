@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.nedrysystems.joiefull.R
+import com.nedrysystems.joiefull.ui.theme.joiefullBackground
 
 /**
  * RatingBar is a composable function that displays a row of star icons representing a rating system.
@@ -41,7 +42,7 @@ fun RatingBar(
             // Animation effect when clicking a star
             var scale by remember { mutableStateOf(1f) }
             val painter = painterResource(id = starIcon)
-            val tintColor = if (value >= i) Color.Yellow else Color.Gray
+            val tintColor = if (value >= i) joiefullBackground else Color.Gray
 
             Icon(
                 painter = painter,
