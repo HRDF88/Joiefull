@@ -221,7 +221,7 @@ class DetailViewModel @Inject constructor(
      * @property _shareContent A mutable state that holds the prepared shareable content.
      */
     fun prepareShareContent(product: ProductUiModel) {
-        val text = "Découvrez ce produit : ${product.name}, Lien : www.joiefull/[${product.name}].com, ${product.picture.url}"
+        val text = "Découvrez ce produit : ${product.name}, Lien : https://www.joiefull/article${product.id}.com, ${product.picture.url}"
         _shareContent.value = text
     }
 

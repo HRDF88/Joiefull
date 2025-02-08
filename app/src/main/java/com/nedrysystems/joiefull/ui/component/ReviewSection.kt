@@ -52,7 +52,6 @@ fun ReviewSection(
             .fillMaxWidth()
             .padding(8.dp)
             .background(Color.White, shape = RoundedCornerShape(12.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
         Row(

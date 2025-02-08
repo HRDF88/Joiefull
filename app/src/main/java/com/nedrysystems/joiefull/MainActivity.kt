@@ -18,7 +18,9 @@ import com.nedrysystems.joiefull.ui.detail.DetailLayout
 import com.nedrysystems.joiefull.ui.home.HomeLayout
 import com.nedrysystems.joiefull.ui.home.HomeViewModel
 import com.nedrysystems.joiefull.ui.splashScreen.SplashScreen
+import com.nedrysystems.joiefull.ui.splashScreen.SplashScreenTablet
 import com.nedrysystems.joiefull.utils.image.imageInterface.ImageLoader
+import com.nedrysystems.joiefull.utils.isTablet.DetermineTablet
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -55,6 +57,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var imageLoader: ImageLoader
 
+
     /**
      * Called when the activity is first created. This method initializes the UI,
      * sets up navigation, and handles the splash screen display logic.
@@ -80,7 +83,10 @@ class MainActivity : ComponentActivity() {
 
                 // Display SplashScreen if showSplash is true, otherwise display navigation
                 if (showSplash) {
-                    SplashScreen(onFinish = { showSplash = false })
+                    if (DetermineTablet.isTablet(this@MainActivity)) {
+                        SplashScreenTablet(onFinish = { showSplash = false })
+                    } else
+                        SplashScreen(onFinish = { showSplash = false })
                 } else {
                     // Once the splash screen is completed, display the main navigation
                     JoiefullNavHost(navHostController = navController, imageLoader = imageLoader)
