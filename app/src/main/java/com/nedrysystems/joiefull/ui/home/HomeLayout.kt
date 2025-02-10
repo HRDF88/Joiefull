@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -28,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,6 +39,7 @@ import androidx.navigation.NavHostController
 import com.nedrysystems.joiefull.ui.component.CategoryHeader
 import com.nedrysystems.joiefull.ui.component.ProductCard
 import com.nedrysystems.joiefull.ui.detail.DetailLayout
+import com.nedrysystems.joiefull.utils.accessibility.AccessibilityHelper
 import com.nedrysystems.joiefull.utils.image.imageInterface.ImageLoader
 import com.nedrysystems.joiefull.utils.isTablet.DetermineTablet
 import javax.inject.Inject
@@ -104,7 +108,9 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                         val productsGroupedByCategory = uiState.products.groupBy { it.category }
 
                         // Display the products by category
-                        LazyColumn {
+                        LazyColumn(modifier = Modifier.semantics {
+                            contentDescription = "Liste des produits par catégorie"
+                        }) {
                             productsGroupedByCategory.forEach { (category, products) ->
                                 item {
                                     // Display category header
@@ -122,7 +128,12 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                 item {
                                     // LazyRow for displaying products
                                     LazyRow(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .semantics {
+                                                contentDescription =
+                                                    "Produits de la catégorie $category"
+                                            },
                                         contentPadding = PaddingValues(horizontal = 8.dp),
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
@@ -163,6 +174,14 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                                 // Update local state 'isLiked' with new value
                                                 isLiked = updatedFavoriteStatus
 
+                                                AccessibilityHelper.announce(
+                                                    context, if (isLiked) {
+                                                        "Bouton cliqué, le produit est dans les favoris"
+                                                    } else {
+                                                        "Bouton cliqué, le produit est retiré des  favoris"
+                                                    }
+                                                )
+
                                             }
 
                                             val onProductClick: () -> Unit = {
@@ -183,9 +202,13 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                                     likeCount = likeCount,
                                                     onLikeClick = onLikeClick,
                                                     onProductClick = onProductClick,
-                                                    imageModifier = Modifier.height(250.dp),
+                                                    imageModifier = Modifier
+                                                        .height(250.dp)
+                                                        .width(250.dp),
                                                     textStyle = TextStyle(fontSize = 24.sp),
-                                                    boxModifier = Modifier.height(300.dp),
+                                                    boxModifier = Modifier
+                                                        .height(300.dp)
+                                                        .fillMaxWidth(),
                                                     starModifier = Modifier.size(24.dp),
                                                     modifier = Modifier
                                                         .padding(end = 16.dp)
@@ -202,7 +225,10 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                                     likeCount = likeCount,
                                                     onLikeClick = onLikeClick,
                                                     onProductClick = onProductClick,
-                                                    imageModifier = Modifier.height(200.dp),
+                                                    boxModifier = Modifier.fillMaxWidth(),
+                                                    imageModifier = Modifier
+                                                        .height(200.dp)
+                                                        .width(200.dp),
                                                     modifier = Modifier
                                                         .padding(end = 8.dp)
                                                         .clickable(onClick = onProductClick)

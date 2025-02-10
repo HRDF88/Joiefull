@@ -23,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 /**
@@ -66,6 +68,7 @@ fun ReviewSection(
                     .size(40.dp)
                     .clip(CircleShape)
                     .border(1.dp, Color.Gray, CircleShape)
+                    .semantics { contentDescription="photo de profil du compte utilisateur" }
 
             )
 
@@ -91,7 +94,7 @@ fun ReviewSection(
             value = comment,
             onValueChange = onCommentChanged,
             placeholder = { Text("Partagez ici vos impressions sur cette pièce") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Champ de texte pour vos commentaires. Actuellement, texte saisie : $comment" },
             shape = RoundedCornerShape(8.dp)
         )
     }

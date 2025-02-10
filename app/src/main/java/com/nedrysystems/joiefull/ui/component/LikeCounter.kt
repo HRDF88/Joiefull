@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,7 +46,7 @@ fun LikeCounter(likeCount: Int, isLiked: Boolean, onLikeClick: () -> Unit, eleva
         ) {
             Icon(
                 imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = "Like Icon",
+                contentDescription = if (isLiked) "Cliquez pour Retirer des favoris" else "\"Cliquez pour Ajouter aux favoris",
                 tint = if (isLiked) Color.Red else Color.Black,
                 modifier = Modifier.size(24.dp)
             )
@@ -54,7 +56,10 @@ fun LikeCounter(likeCount: Int, isLiked: Boolean, onLikeClick: () -> Unit, eleva
             Text(
                 text = likeCount.toString(),
                 fontSize = 16.sp,
-                color = Color.Black
+                color = Color.Black,
+                modifier = Modifier.semantics {
+                    contentDescription = "le nombre de likes est de ${likeCount}"
+                }
             )
         }
     }

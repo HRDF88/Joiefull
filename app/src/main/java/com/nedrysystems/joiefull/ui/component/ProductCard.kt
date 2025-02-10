@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -24,6 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +60,8 @@ fun ProductCard(
     imageModifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle(fontSize = 12.sp),
     starModifier : Modifier = Modifier,
-    cardElevation: Dp = 4.dp
+    cardElevation: Dp = 4.dp,
+    cropImage : ContentScale = ContentScale.Crop
 ) {
     // Product card layout
     Card(
@@ -79,13 +84,14 @@ fun ProductCard(
             Box(
                 contentAlignment = Alignment.BottomEnd,
                 modifier = boxModifier
-                    .fillMaxWidth()
+                    .width(200.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = onProductClick)
             ) {
                 Image(
                     painter = painter,
-                    contentDescription = null,
+                    contentDescription = "Image du produit ${product.name}, sa description est ${product.picture.description}",
+                    contentScale = cropImage,
                     modifier = imageModifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
@@ -119,13 +125,14 @@ fun ProductCard(
                     text = product.name,
                     textAlign = TextAlign.Start,
                     style = textStyle,
+                    modifier = Modifier.semantics{"le produit est ${product.name}"}
 
                     )
 
                 if (product.rate != null) {
                     Icon(
                         imageVector = Icons.Filled.Star,
-                        contentDescription = "Star",
+                        contentDescription = null,
                         tint = joiefullBackground,
                         modifier = starModifier.size(14.dp)
                             .align(Alignment.Bottom)
@@ -138,7 +145,8 @@ fun ProductCard(
                 Text(
                     text = if (product.rate != null) "${product.rate} ️" else "",
                     textAlign = TextAlign.End,
-                    style = textStyle
+                    style = textStyle,
+                    modifier = Modifier.semantics { contentDescription = "le produit est noté ${product.rate} étoiles sur 5" },
                 )
             }
 
@@ -147,23 +155,27 @@ fun ProductCard(
             // Display price and original price (striked through if available)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
+                verticalAlignment = Alignment.Bottom,
+
             ) {
                 Text(
                     text = "${product.price} €",
                     style = textStyle,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.semantics{contentDescription = "le prix de ${product.name} est de ${product.price} euros"}
 
                     )
                 Spacer(modifier = Modifier.weight(1f))
+
                 product.originalPrice?.let { originalPrice ->
                     if (originalPrice > product.price) {
                         Text(
                             text = "$originalPrice €",
                             style = textStyle,
-                            color = Color.Gray,
+                            color = Color.Black,
                             textDecoration = TextDecoration.LineThrough, // Crossed out the original price
+                            modifier = Modifier.semantics{contentDescription = "le prix originel de ${product.name} était de ${product.originalPrice} euros"}
+                                .align(Alignment.Bottom)
 
 
                         )

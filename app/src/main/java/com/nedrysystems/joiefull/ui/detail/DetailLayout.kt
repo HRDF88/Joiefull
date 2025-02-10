@@ -36,7 +36,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,6 +50,7 @@ import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.ui.component.ProductCard
 import com.nedrysystems.joiefull.ui.component.ReviewSection
 import com.nedrysystems.joiefull.ui.component.SaveButton
+import com.nedrysystems.joiefull.utils.accessibility.AccessibilityHelper
 import com.nedrysystems.joiefull.utils.image.imageInterface.ImageLoader
 import com.nedrysystems.joiefull.utils.isTablet.DetermineTablet
 import javax.inject.Inject
@@ -137,6 +142,14 @@ class DetailLayout @Inject constructor(
 
             // Update local state 'isLiked' with new value
             isLiked = updatedFavoriteStatus
+
+            AccessibilityHelper.announce(
+                context, if (isLiked) {
+                    "Bouton cliqué, le produit est dans les favoris"
+                } else {
+                    "Bouton cliqué, le produit est retiré des  favoris"
+                }
+            )
         }
 
         // user's profile image
@@ -188,10 +201,13 @@ class DetailLayout @Inject constructor(
                         onProductClick = {},
                         onLikeClick = onLikeClick,
                         imageModifier = Modifier.height(500.dp),
-                        boxModifier = Modifier.height(500.dp),
+                        boxModifier = Modifier
+                            .height(500.dp)
+                            .fillMaxWidth(),
                         textStyle = TextStyle(fontSize = 18.sp),
                         starModifier = Modifier.size(24.dp),
-                        cardElevation = 0.dp
+                        cardElevation = 0.dp,
+                        cropImage = ContentScale.Fit
                     )
                     // Icons positioned at the top of the ProductCard
                     Row(
@@ -200,8 +216,9 @@ class DetailLayout @Inject constructor(
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        if (!isTablet) {
-                            IconButton(onClick = { navController.popBackStack() }) {
+
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            if (!isTablet) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Retour",
@@ -218,8 +235,9 @@ class DetailLayout @Inject constructor(
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Partager",
-                                modifier = Modifier.size(24.dp)
+                                contentDescription = "Partager le produit",
+                                modifier = Modifier
+                                    .size(24.dp)
                                     .align(Alignment.Bottom)
                             )
                         }
@@ -251,7 +269,9 @@ class DetailLayout @Inject constructor(
                         text = product.picture.description,
                         textAlign = TextAlign.Start,
                         fontSize = 18.sp,
-                    )
+                        modifier = Modifier.semantics { invisibleToUser() }
+
+                        )
                 }
 
                 // Review section where users can submit a rating and comment
