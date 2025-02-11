@@ -81,7 +81,9 @@ class DetailLayout @Inject constructor(
         productId: Int,
         detailViewModel: DetailViewModel,
         imageLoader: ImageLoader,
-        navController: NavHostController
+        navController: NavHostController,
+        onSaveClick: () -> Unit,
+        onLikeClick:()->Unit,
     ) {
         // Observes product state and UI state from ViewModel
         val productState by detailViewModel.productState.collectAsState()
@@ -96,6 +98,16 @@ class DetailLayout @Inject constructor(
         LaunchedEffect(productId) {
             detailViewModel.fetchProductDetails(productId)
             detailViewModel.getUserAndUpdateState()
+        }
+
+        // LaunchedEffect will observe productState and recompute if the product changes
+        LaunchedEffect(productState) {
+            productState?.let {
+                if (it.id == productId) {
+                    // Fetch fresh details whenever product is updated
+                    detailViewModel.fetchProductDetails(productId)
+                }
+            }
         }
 
         // Show loading indicator if data is still loading
@@ -162,6 +174,8 @@ class DetailLayout @Inject constructor(
             // Update local state 'isLiked' with new value
             isLiked = updatedFavoriteStatus
 
+            if(isTablet){onLikeClick()}
+
             AccessibilityHelper.announce(
                 context, if (isLiked) {
                     addFavoriteClickedTextContentDescription
@@ -202,7 +216,11 @@ class DetailLayout @Inject constructor(
                     Toast.LENGTH_SHORT
                 ).show()
                 // return to Home
-                navController.popBackStack()
+                if (isTablet) {
+                    onSaveClick()
+                } else {
+                    navController.popBackStack()
+                }
             }
         }
 

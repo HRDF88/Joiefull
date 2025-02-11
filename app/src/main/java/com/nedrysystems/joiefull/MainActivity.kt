@@ -133,13 +133,22 @@ fun JoiefullNavHost(navHostController: NavHostController, imageLoader: ImageLoad
         // Route to display product details, retrieving productId from navigation arguments
         composable("productDetail/{productId}") { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")?.toInt() ?: -1
+            val onSaveClick: () -> Unit = {
+                navHostController.popBackStack()
+            }
+            val onLikeClick: () -> Unit = {
+                navHostController.popBackStack()
+
+            }
 
             // Call the Render function of DetailLayout with the productId
             DetailLayout(imageLoader = imageLoader, productId = productId).Render(
                 productId = productId,  // The productId is passed to Render
                 detailViewModel = hiltViewModel(), // Use Hilt to inject the ViewModel
                 imageLoader = imageLoader,
-                navController = navHostController
+                navController = navHostController,
+                onSaveClick = onSaveClick,
+                onLikeClick = onLikeClick
             )
         }
     }

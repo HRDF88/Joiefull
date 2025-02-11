@@ -42,6 +42,7 @@ import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.ui.component.CategoryHeader
 import com.nedrysystems.joiefull.ui.component.ProductCard
 import com.nedrysystems.joiefull.ui.detail.DetailLayout
+import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
 import com.nedrysystems.joiefull.utils.accessibility.AccessibilityHelper
 import com.nedrysystems.joiefull.utils.image.imageInterface.ImageLoader
 import com.nedrysystems.joiefull.utils.isTablet.DetermineTablet
@@ -77,8 +78,11 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
         //Determine is app running on tablet or phone
         val isTablet = DetermineTablet.isTablet(context)
 
+
         // get Id on the product clicked
         var selectedProductId by remember { mutableStateOf<Int?>(null) }
+
+        val productsState = remember { mutableStateOf<List<ProductUiModel>>(emptyList()) }
 
 
         // Show error message if an error occurred
@@ -186,6 +190,16 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                                 // Update local state 'isLiked' with new value
                                                 isLiked = updatedFavoriteStatus
 
+                                                // Update the products state with the new list of products
+                                                productsState.value = productsState.value.map {
+                                                    if (it.id == updatedProduct.id) updatedProduct else it
+                                                }
+
+                                                // If on tablet, close the detail layout with the updated product
+                                                if (isTablet) {
+                                                    selectedProductId = null // Close the DetailLayout
+                                                }
+
                                                 AccessibilityHelper.announce(
                                                     context, if (isLiked) {
                                                         addFavoriteClickedTextContentDescription
@@ -267,16 +281,20 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                     selectedProductId?.let { productId ->
                         DetailLayout(
                             productId = productId,
-                            imageLoader = imageLoader
+                            imageLoader = imageLoader,
                         ).Render(
                             productId = productId,
                             detailViewModel = hiltViewModel(),
                             imageLoader = imageLoader,
-                            navController = navController
+                            navController = navController,
+                            onSaveClick = { selectedProductId = null; viewModel.refreshProducts()
+                            },
+                            onLikeClick = {viewModel.refreshProducts()}
                         )
                     }
                 }
             }
+
         }
     }
 }
