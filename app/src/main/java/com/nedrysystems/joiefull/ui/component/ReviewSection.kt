@@ -1,6 +1,5 @@
 package com.nedrysystems.joiefull.ui.component
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,9 +22,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.nedrysystems.joiefull.R
 
 /**
  * ReviewSection is a composable function that displays a user review section, including a profile image,
@@ -45,10 +46,8 @@ fun ReviewSection(
     comment: String,
     onCommentChanged: (String) -> Unit
 ) {
-    // Log pour vérifier si rating change
-    Log.d("RatingUpdate", "Évaluation actuelle dans ReviewSection: $rating")
-
-    // Log to check if the rating changes
+    val profilePictureTextContentDescription = stringResource(R.string.profile_picture_description)
+    val commentTextContentDescription = stringResource(R.string.comment_field_description, comment)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -68,7 +67,7 @@ fun ReviewSection(
                     .size(40.dp)
                     .clip(CircleShape)
                     .border(1.dp, Color.Gray, CircleShape)
-                    .semantics { contentDescription="photo de profil du compte utilisateur" }
+                    .semantics { contentDescription = profilePictureTextContentDescription }
 
             )
 
@@ -78,7 +77,6 @@ fun ReviewSection(
             RatingBar(
                 value = rating,
                 onValueChange = { newRating ->
-                    Log.d("RatingUpdate", "Nouvelle note: $newRating")
                     onRatingChanged(newRating) // Updates the rating in the parent component
                 },
                 numStars = 5,
@@ -93,8 +91,10 @@ fun ReviewSection(
         OutlinedTextField(
             value = comment,
             onValueChange = onCommentChanged,
-            placeholder = { Text("Partagez ici vos impressions sur cette pièce") },
-            modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Champ de texte pour vos commentaires. Actuellement, texte saisie : $comment" },
+            placeholder = { Text(stringResource(R.string.commentPlaceHolder)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = commentTextContentDescription },
             shape = RoundedCornerShape(8.dp)
         )
     }

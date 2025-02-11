@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -59,10 +60,21 @@ fun ProductCard(
     boxModifier: Modifier = Modifier,
     imageModifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle(fontSize = 12.sp),
-    starModifier : Modifier = Modifier,
+    starModifier: Modifier = Modifier,
     cardElevation: Dp = 4.dp,
-    cropImage : ContentScale = ContentScale.Crop
+    cropImage: ContentScale = ContentScale.Crop
 ) {
+    // String Resources for content description
+    val pictureProductTextContentDescription = stringResource(R.string.product_image_description,product.name, product.picture.description)
+    val productNameTextContentDescription = stringResource(R.string.product_name_text, product.name)
+    val productRateTextContentDescription =
+        stringResource(R.string.product_rating, product.rate ?: 0)
+    val productPriceTextContentDescription =
+        stringResource(R.string.product_price, product.name, product.price)
+    val productOriginalPriceTextContentDescription =
+        stringResource(R.string.product_original_price, product.name, product.originalPrice ?: 0)
+
+
     // Product card layout
     Card(
         modifier = modifier
@@ -90,7 +102,7 @@ fun ProductCard(
             ) {
                 Image(
                     painter = painter,
-                    contentDescription = "Image du produit ${product.name}, sa description est ${product.picture.description}",
+                    contentDescription = pictureProductTextContentDescription,
                     contentScale = cropImage,
                     modifier = imageModifier
                         .fillMaxWidth()
@@ -106,7 +118,11 @@ fun ProductCard(
                     contentAlignment = Alignment.BottomEnd
                 ) {
                     LikeCounter(
-                        likeCount = likeCount,
+                        likeCount = if (product.favorite) {
+                            likeCount + 1
+                        } else {
+                            likeCount //use favorite state to update likeCount
+                        },
                         isLiked = product.favorite, // Use current 'isLiked' state
                         onLikeClick = onLikeClick
 
@@ -125,16 +141,19 @@ fun ProductCard(
                     text = product.name,
                     textAlign = TextAlign.Start,
                     style = textStyle,
-                    modifier = Modifier.semantics{"le produit est ${product.name}"}
+                    modifier = Modifier.semantics {
+                        contentDescription = productNameTextContentDescription
+                    }
 
-                    )
+                )
 
                 if (product.rate != null) {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
                         tint = joiefullBackground,
-                        modifier = starModifier.size(14.dp)
+                        modifier = starModifier
+                            .size(14.dp)
                             .align(Alignment.Bottom)
                     )
                 } else {
@@ -146,7 +165,9 @@ fun ProductCard(
                     text = if (product.rate != null) "${product.rate} ️" else "",
                     textAlign = TextAlign.End,
                     style = textStyle,
-                    modifier = Modifier.semantics { contentDescription = "le produit est noté ${product.rate} étoiles sur 5" },
+                    modifier = Modifier.semantics {
+                        contentDescription = productRateTextContentDescription
+                    },
                 )
             }
 
@@ -157,14 +178,16 @@ fun ProductCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
 
-            ) {
+                ) {
                 Text(
                     text = "${product.price} €",
                     style = textStyle,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.semantics{contentDescription = "le prix de ${product.name} est de ${product.price} euros"}
+                    modifier = Modifier.semantics {
+                        contentDescription = productPriceTextContentDescription
+                    }
 
-                    )
+                )
                 Spacer(modifier = Modifier.weight(1f))
 
                 product.originalPrice?.let { originalPrice ->
@@ -174,7 +197,10 @@ fun ProductCard(
                             style = textStyle,
                             color = Color.Black,
                             textDecoration = TextDecoration.LineThrough, // Crossed out the original price
-                            modifier = Modifier.semantics{contentDescription = "le prix originel de ${product.name} était de ${product.originalPrice} euros"}
+                            modifier = Modifier
+                                .semantics {
+                                    contentDescription = productOriginalPriceTextContentDescription
+                                }
                                 .align(Alignment.Bottom)
 
 

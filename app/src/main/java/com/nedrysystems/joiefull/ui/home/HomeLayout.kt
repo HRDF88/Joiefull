@@ -1,7 +1,6 @@
 package com.nedrysystems.joiefull.ui.home
 
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,7 +28,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -36,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.ui.component.CategoryHeader
 import com.nedrysystems.joiefull.ui.component.ProductCard
 import com.nedrysystems.joiefull.ui.detail.DetailLayout
@@ -78,18 +81,32 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
         var selectedProductId by remember { mutableStateOf<Int?>(null) }
 
 
-        // Show Toast notification in case of error
-        LaunchedEffect(uiState.error) {
-            if (uiState.error.isNotEmpty()) {
-                Toast.makeText(context, uiState.error, Toast.LENGTH_SHORT).show()
+        // Show error message if an error occurred
+        uiState.error?.let { errorResId ->
+            val errorMessage = stringResource(id = errorResId)
+
+            LaunchedEffect(errorMessage) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
             }
         }
 
+        uiState.errorMessage?.let { exceptionMessage ->
+            Text(
+                text = exceptionMessage,
+                color = Color.Red
+            )
+            return
+        }
 
         // Reload state when screen is revisited
         LaunchedEffect(key1 = uiState.products) {
             viewModel.refreshProducts()
         }
+        //Val for content Description
+        val lazyColumTextContentDescription = stringResource(R.string.list_of_product_category)
+        val addFavoriteClickedTextContentDescription = stringResource(R.string.addFavoriteClicked)
+        val removeFavoriteClickedTextForContentDescription =
+            stringResource(R.string.removeFavoriteClicked)
 
         Row() {
             // Main layout displaying products
@@ -107,9 +124,10 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                         // Group products by category
                         val productsGroupedByCategory = uiState.products.groupBy { it.category }
 
+
                         // Display the products by category
                         LazyColumn(modifier = Modifier.semantics {
-                            contentDescription = "Liste des produits par catégorie"
+                            contentDescription = lazyColumTextContentDescription
                         }) {
                             productsGroupedByCategory.forEach { (category, products) ->
                                 item {
@@ -126,22 +144,20 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                 }
 
                                 item {
+                                    val categoryTextContentDescription =
+                                        stringResource(R.string.category_products, category)
                                     // LazyRow for displaying products
                                     LazyRow(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .semantics {
                                                 contentDescription =
-                                                    "Produits de la catégorie $category"
+                                                    categoryTextContentDescription
                                             },
                                         contentPadding = PaddingValues(horizontal = 8.dp),
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         items(products) { product ->
-                                            Log.d(
-                                                "HomeLayout",
-                                                "Displaying Product: Name: ${product.name}, Price: ${product.price}, Category: ${product.category}, Original Price: ${product.originalPrice}, Rate: ${product.rate}, Favorite: ${product.favorite}"
-                                            )
 
                                             var likeCount by rememberSaveable(product.id) {
                                                 mutableStateOf(
@@ -159,9 +175,6 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
 
                                                 // Toggle the favorite status and update the like count
                                                 val updatedFavoriteStatus = !isLiked
-                                                likeCount =
-                                                    if (updatedFavoriteStatus) likeCount + 1 else likeCount - 1
-
 
                                                 // Create a new product with updated favorite status
                                                 val updatedProduct =
@@ -170,15 +183,14 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                                 // Call ViewModel's toggleFavorite method to update the product
                                                 viewModel.toggleFavorite(updatedProduct)
 
-
                                                 // Update local state 'isLiked' with new value
                                                 isLiked = updatedFavoriteStatus
 
                                                 AccessibilityHelper.announce(
                                                     context, if (isLiked) {
-                                                        "Bouton cliqué, le produit est dans les favoris"
+                                                        addFavoriteClickedTextContentDescription
                                                     } else {
-                                                        "Bouton cliqué, le produit est retiré des  favoris"
+                                                        removeFavoriteClickedTextForContentDescription
                                                     }
                                                 )
 
@@ -187,7 +199,7 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                             val onProductClick: () -> Unit = {
                                                 if (isTablet) {
                                                     selectedProductId =
-                                                        product.id // Met à jour l'affichage sur tablette
+                                                        product.id
                                                 } else {
                                                     navController.navigate("productDetail/${product.id}") // Navigue sur mobile
                                                 }

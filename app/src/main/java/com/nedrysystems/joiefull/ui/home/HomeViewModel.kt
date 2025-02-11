@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.data.webservice.PictureApiResponse
 import com.nedrysystems.joiefull.domain.model.ProductLocalInfo
 import com.nedrysystems.joiefull.domain.usecase.productApi.GetProductUseCase
@@ -66,14 +67,14 @@ open class HomeViewModel @Inject constructor(
      */
     private fun fetchProducts() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = "")
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
                 val products = getProducts()
                 _uiState.value = _uiState.value.copy(products = products, isLoading = false)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "Erreur : ${e.message}"
+                    errorMessage = "${e.message}"
                 )
             }
         }
@@ -92,17 +93,11 @@ open class HomeViewModel @Inject constructor(
         return try {
             // Fetch products from the API
             val apiProducts = getProductUseCase.invoke()
-            Log.d(
-                "HomeViewModel",
-                "API Products: ${apiProducts.size}"
-            ) // Log pour vérifier les produits API
+
 
             // Fetch local products
             val localProducts = getLocalProductInfoUseCase.execute()
-            Log.d(
-                "HomeViewModel",
-                "Local Products: ${localProducts.size}"
-            ) // Log pour vérifier les produits locaux
+
             val localProductsMap = localProducts.associateBy { it.id }
 
 
@@ -129,7 +124,8 @@ open class HomeViewModel @Inject constructor(
             // In case of failure, update UI state with error
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
-                error = "Erreur lors de la récupération des produits : ${exception.message}"
+                error = R.string.error_retrieving_products,
+                errorMessage = "${exception.message}"
             )
 
             val localProducts = getLocalProductInfoUseCase.execute()
@@ -138,8 +134,8 @@ open class HomeViewModel @Inject constructor(
                 ProductUiModel(
                     id = localProduct.id,
                     picture = PictureApiResponse("", ""),
-                    name = "Produit local inconnu", // Default name
-                    category = "Inconnu", // Default category
+                    name = "", // Default name
+                    category = "", // Default category
                     likes = 0, // No information on likes
                     price = 0.0, // Default price
                     originalPrice = null, // No original price
@@ -164,18 +160,8 @@ open class HomeViewModel @Inject constructor(
                 // Toggle the favorite status of the product
                 val newFavoriteStatus = !product.favorite
 
-                // Log product details before updating
-                Log.d(
-                    "HomeViewModel",
-                    "Avant mise à jour: ${product.id} - Favori: ${product.favorite}"
-                )
-
                 // Update the favorite status in the database using the UseCase
                 updateFavoriteStatusUseCase.execute(product.id, newFavoriteStatus)
-
-                // Retrieve the updated product from local storage
-                val updatedProduct = getProductLocalInfoUseCase.execute(product.id)
-                Log.d("HomeViewModel", "Produit récupéré après mise à jour: $updatedProduct")
 
                 // Update _productState to also include likes
                 _productState.value = _productState.value?.copy(favorite = newFavoriteStatus)
@@ -190,8 +176,7 @@ open class HomeViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 // Handle errors
-                Log.e("HomeViewModel", "Erreur lors de la mise à jour du favori", e)
-                _uiState.value = _uiState.value.copy(error = "Impossible de mettre en favori")
+                _uiState.value = _uiState.value.copy(error = R.string.unable_to_favorite)
             }
         }
     }
@@ -213,14 +198,14 @@ open class HomeViewModel @Inject constructor(
                         if (it.id == productId) updatedProduct?.let { it1 ->
                             it.copy(
                                 favorite = it1.favorite,
-                                likes = if (updatedProduct.favorite) it.likes + 1 else it.likes - 1
                             )
                         } else it
                     }.filterNotNull()
                     state.copy(products = updatedProducts)
                 }
             } catch (e: Exception) {
-                Log.e("HomeViewModel", "Erreur lors de la mise à jour du produit", e)
+                _uiState.value =
+                    _uiState.value.copy(error = R.string.unable_to_update_product)
             }
         }
     }

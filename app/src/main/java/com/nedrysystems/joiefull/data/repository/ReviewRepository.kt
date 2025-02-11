@@ -35,7 +35,7 @@ class ReviewRepository @Inject constructor(private val reviewDao: ReviewDao) :
         if (existingReview != null) {
             // If a review exists, update it
             val updatedReview = existingReview.copy(rate = rate, comment = comment)
-            reviewDao.insertReview(updatedReview) // Remplace l'ancienne review
+            reviewDao.insertReview(updatedReview)
         } else {
             // If no review exists, insert a new one
             val newReview = Review(

@@ -1,10 +1,10 @@
 package com.nedrysystems.joiefull.ui.detail
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.data.webservice.PictureApiResponse
 import com.nedrysystems.joiefull.domain.model.ProductLocalInfo
 import com.nedrysystems.joiefull.domain.model.User
@@ -76,7 +76,7 @@ class DetailViewModel @Inject constructor(
      */
     fun fetchProductDetails(productId: Int) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = "")
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
                 val products = getProducts().find { it.id == productId }
                 if (products != null) {
@@ -85,14 +85,13 @@ class DetailViewModel @Inject constructor(
                     _productState.value = products // Update the product state for display
                 } else {
                     _uiState.value =
-                        _uiState.value.copy(isLoading = false, error = "Produit non trouvé")
+                        _uiState.value.copy(isLoading = false, error = R.string.product_not_found)
                 }
             } catch (e: Exception) {
                 // Handle errors and update state
-                Log.e("DetailViewModel", "Erreur lors de la récupération du produit", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "Erreur lors de la récupération du produit"
+                    error = R.string.error_retrieving_product
                 )
             }
         }
@@ -110,11 +109,10 @@ class DetailViewModel @Inject constructor(
         return try {
             // Fetch products from the API
             val apiProducts = getProductUseCase.invoke()
-            Log.d("DetailViewModel", "API Products: ${apiProducts.size}")
+
 
             // Fetch local products
             val localProducts = getLocalProductInfoUseCase.execute()
-            Log.d("DetailViewModel", "Local Products: ${localProducts.size}")
             val localProductsMap = localProducts.associateBy { it.id }
 
             // Merge API and local data
@@ -139,7 +137,9 @@ class DetailViewModel @Inject constructor(
             // In case of failure, update UI state with error
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
-                error = "Erreur lors de la récupération des produits : ${exception.message}"
+                error = R.string.error_retrieving_product,
+                errorMessage = exception.message
+
             )
 
             // Fallback to local products
@@ -174,31 +174,22 @@ class DetailViewModel @Inject constructor(
                 // Toggle the favorite status of the product
                 val newFavoriteStatus = !product.favorite
 
-                // Log product details before updating
-                Log.d(
-                    "DetailViewModel",
-                    "Avant mise à jour: ${product.id} - Favori: ${product.favorite}"
-                )
-
                 // Update the favorite status in the database using the UseCase
                 updateFavoriteStatusUseCase.execute(product.id, newFavoriteStatus)
 
                 // Retrieve the updated product from local storage
                 val updatedProduct = getProductLocalInfoUseCase.execute(product.id)
-                Log.d("DetailViewModel", "Produit récupéré après mise à jour: $updatedProduct")
 
                 // Update the product state with the new favorite status
                 _productState.value = _productState.value?.copy(
                     favorite = newFavoriteStatus,
-                    likes = if (newFavoriteStatus) _productState.value?.likes?.plus(1) ?: 0
-                    else _productState.value?.likes?.minus(1) ?: 0
-                )
+
+                    )
 
                 // Update the UI state product list
                 val updatedProducts = _uiState.value.products.map {
                     if (it.id == product.id) it.copy(
                         favorite = newFavoriteStatus,
-                        likes = if (newFavoriteStatus) it.likes + 1 else it.likes - 1
                     ) else it
                 }
 
@@ -207,8 +198,7 @@ class DetailViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 // Handle errors
-                Log.e("DetailViewModel", "Erreur lors de la mise à jour du favori", e)
-                _uiState.value = _uiState.value.copy(error = "Impossible de mettre en favori")
+                _uiState.value = _uiState.value.copy(error = R.string.unable_to_favorite)
             }
         }
     }
@@ -221,7 +211,8 @@ class DetailViewModel @Inject constructor(
      * @property _shareContent A mutable state that holds the prepared shareable content.
      */
     fun prepareShareContent(product: ProductUiModel) {
-        val text = "Découvrez ce produit : ${product.name}, Lien : https://www.joiefull/article${product.id}.com, ${product.picture.url}"
+        val text =
+            "Découvrez ce produit : ${product.name}, Lien : https://www.joiefull/article${product.id}.com, ${product.picture.url}"
         _shareContent.value = text
     }
 
@@ -246,7 +237,7 @@ class DetailViewModel @Inject constructor(
                 _uiState.value = DetailUiState(
                     user = User(id = 0, name = "Unknown", picture = ""),
                     isLoading = false,
-                    error = "User not found"
+                    error = R.string.user_not_found
                 )
             }
         }
@@ -284,8 +275,8 @@ class DetailViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 // Handle errors
-                Log.e("DetailViewModel", "Error saving review or updating product rating", e)
-                _uiState.value = DetailUiState(error = "Error saving review or updating product rating")
+                _uiState.value =
+                    DetailUiState(error = R.string.error_saving_review)
             }
         }
     }

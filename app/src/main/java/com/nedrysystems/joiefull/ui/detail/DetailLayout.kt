@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.invisibleToUser
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -92,6 +91,7 @@ class DetailLayout @Inject constructor(
         //Determine is app running on tablet or phone
         val isTablet = DetermineTablet.isTablet(context)
 
+
         // Fetch product details and user's profile picture when the screen is launched
         LaunchedEffect(productId) {
             detailViewModel.fetchProductDetails(productId)
@@ -105,11 +105,23 @@ class DetailLayout @Inject constructor(
         }
 
         // Show error message if an error occurred
-        if (uiState.error.isNotEmpty()) {
-            // Afficher un message d'erreur
-            Text(text = "Erreur: ${uiState.error}", color = Color.Red)
+        uiState.error?.let { errorResId ->
+            val errorMessage = stringResource(id = errorResId)
+            Text(
+                text = errorMessage,
+                color = Color.Red
+            )
             return
         }
+
+        uiState.errorMessage?.let { exceptionMessage ->
+            Text(
+                text = exceptionMessage,
+                color = Color.Red
+            )
+            return
+        }
+
 
         // Retrieve the product from state
         val product = productState
@@ -117,22 +129,29 @@ class DetailLayout @Inject constructor(
 
         // Show message if product is not found
         if (product == null) {
-            Text(text = "Produit non trouvé")
+            Text(text = stringResource(R.string.product_not_found))
             return
         }
 
         // Mutable states for managing UI interactions
         var rating by rememberSaveable { mutableStateOf(0) }
         var comment by rememberSaveable { mutableStateOf("") }
-        var likeCount by remember(product) { mutableStateOf(product.likes) }
+        val likeCount by remember(product) { mutableStateOf(product.likes) }
         var isLiked by remember(product) { mutableStateOf(product.favorite) }
+
+        //Content Description string resources ans string resources
+        val addFavoriteClickedTextContentDescription = stringResource(R.string.addFavoriteClicked)
+        val removeFavoriteClickedTextForContentDescription =
+            stringResource(R.string.removeFavoriteClicked)
+        val errorToastSaveButtonText = stringResource(R.string.error_save_buton)
+        val reviewSavedText = stringResource(R.string.review_save)
+        val shareByText = stringResource(R.string.share_by)
 
         // Callback for handling favorite (like) button click// Callback for handling favorite (like) button click
         val onLikeClick: () -> Unit = {
             // Toggle the favorite status and update the like count
             val updatedFavoriteStatus = !isLiked
-            likeCount =
-                if (updatedFavoriteStatus) likeCount + 1 else likeCount - 1
+
 
             // Create a new product with updated favorite status
             val updatedProduct = product.copy(favorite = isLiked)
@@ -145,9 +164,9 @@ class DetailLayout @Inject constructor(
 
             AccessibilityHelper.announce(
                 context, if (isLiked) {
-                    "Bouton cliqué, le produit est dans les favoris"
+                    addFavoriteClickedTextContentDescription
                 } else {
-                    "Bouton cliqué, le produit est retiré des  favoris"
+                    removeFavoriteClickedTextForContentDescription
                 }
             )
         }
@@ -161,8 +180,6 @@ class DetailLayout @Inject constructor(
             )
         }
 
-        Log.d("RatingUpdate", "Note actuelle dans Render: $rating")
-
         val shareContent by detailViewModel.shareContent.observeAsState()
 
 
@@ -172,14 +189,18 @@ class DetailLayout @Inject constructor(
                 // Show a Toast if no note is selected or the comment is empty
                 Toast.makeText(
                     context,
-                    "Merci de laisser une note et un commentaire",
+                    errorToastSaveButtonText,
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
                 // Run the saveReviewAndUpdateProductRating function with the appropriate parameters if everything is valid
                 detailViewModel.saveReviewAndUpdateProductRating(1, productId, rating, comment)
                 // Show a Toast to inform user about success
-                Toast.makeText(context, "Avis enregistré avec succès", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    reviewSavedText,
+                    Toast.LENGTH_SHORT
+                ).show()
                 // return to Home
                 navController.popBackStack()
             }
@@ -221,7 +242,7 @@ class DetailLayout @Inject constructor(
                             if (!isTablet) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Retour",
+                                    contentDescription = stringResource(R.string.back),
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -235,7 +256,7 @@ class DetailLayout @Inject constructor(
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Partager le produit",
+                                contentDescription = stringResource(R.string.share_product),
                                 modifier = Modifier
                                     .size(24.dp)
                                     .align(Alignment.Bottom)
@@ -252,7 +273,7 @@ class DetailLayout @Inject constructor(
                             type = "text/plain"
                             putExtra(Intent.EXTRA_TEXT, shareText)
                         }
-                        context.startActivity(Intent.createChooser(intent, "Partager via"))
+                        context.startActivity(Intent.createChooser(intent, shareByText))
                     }
                 }
 
@@ -271,7 +292,7 @@ class DetailLayout @Inject constructor(
                         fontSize = 18.sp,
                         modifier = Modifier.semantics { invisibleToUser() }
 
-                        )
+                    )
                 }
 
                 // Review section where users can submit a rating and comment
@@ -280,7 +301,6 @@ class DetailLayout @Inject constructor(
                         profileImage = profileImage,
                         rating = rating,
                         onRatingChanged = { newRating ->
-                            Log.d("RatingUpdate", "Nouvelle note dans Render: $newRating")
                             rating = newRating
                         },
                         comment = comment,

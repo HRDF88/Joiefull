@@ -7,19 +7,25 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.ui.theme.joiefullBackground
 
 @Composable
 fun SaveButton(saveButtonClick: () -> Unit, modifier: Modifier = Modifier) {
+    val saveTextContentDescription = stringResource(R.string.save_content_description)
     Button(
         onClick = saveButtonClick,
         modifier = modifier.then(Modifier.padding(16.dp)),
         colors = ButtonDefaults.buttonColors(backgroundColor = joiefullBackground)
     ) {
-        Text(text = "Enregistrer",color = Color.Black, modifier = Modifier.semantics { contentDescription = "Ce bouton permet d'enregistrer votre note et commentaire de ce produit" })
+        Text(
+            text = stringResource(R.string.save),
+            color = Color.Black,
+            modifier = Modifier.semantics { contentDescription = saveTextContentDescription })
 
     }
 }

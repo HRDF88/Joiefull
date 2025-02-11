@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -41,10 +42,15 @@ fun RatingBar(
 ) {
 
     val context = LocalContext.current
+
     Row(modifier = modifier.fillMaxWidth()) {
         for (i in 1..numStars) {
             // Determines whether the star should be filled or empty
             val starIcon = if (value >= i) R.drawable.starfull else R.drawable.star
+            val starSelectionTextContentDescription =
+                stringResource(R.string.star_selection, i, numStars)
+            val ratingMessage = stringResource(R.string.rating_message, value)
+            val ratingConfirmedContentDescription = stringResource(R.string.rating_confirmed, i)
 
             // Animation effect when clicking a star
             var scale by remember { mutableStateOf(1f) }
@@ -57,13 +63,11 @@ fun RatingBar(
                 modifier = Modifier
                     .size(48.dp)
                     .scale(scale)
-                    .semantics { contentDescription = "Etoile de ${i} sélectionnée sur ${numStars}" }
+                    .semantics { contentDescription = starSelectionTextContentDescription }
                     .clickable {
-                        Log.d("RatingUpdate", "Étoile cliquée : $i")
                         onValueChange(i)
-                        val ratingMessage = "Vous avez sélectionné ${value} étoiles."
                         Modifier.semantics { contentDescription = ratingMessage }
-                        AccessibilityHelper.announce(context, "Bouton cliqué, note confirmée de ${i} étoiles.")
+                        AccessibilityHelper.announce(context, ratingConfirmedContentDescription)
                     },
                 tint = tintColor
             )

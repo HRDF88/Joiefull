@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">Joiefull</string>
+
+    //Component------------------------------------------------------------------------------------
+
+    //CategoryHeader
+    <string name="category">Catégorie %1$s</string>
+
+    //LikeCounter
+    <string name="removeFavorite">Cliquez pour retirer des favoris</string>
+    <string name="addFavorite">Cliquez pour Ajouter aux favoris</string>
+    <string name="like_count_text">Le nombre de likes est de %d</string>
+
+    //ProductCard
+    <string name="product_image_description">Image du produit %1$s, sa description est %2$s</string>
+    <string name="product_name_text">Le produit est %s</string>
+    <string name="product_rating">Le produit est noté %d étoiles sur 5</string>
+    <string name="product_price">Le prix de %1$s est de %2$.2f euros</string>
+    <string name="product_original_price">Le prix originel de %1$s était de %2$.2f euros</string>
+
+    //RatingBar
+    <string name="star_selection">Étoile de %1$d sélectionnée sur %2$d</string>
+    <string name="rating_message">Vous avez sélectionné %1$d étoiles.</string>
+    <string name="rating_confirmed">Bouton cliqué, note confirmée de %1$d étoiles.</string>
+
+    //ReviewSection
+    <string name="profile_picture_description">Photo de profil du compte utilisateur</string>
+    <string name="commentPlaceHolder">Partagez ici vos impressions sur cette pièce</string>
+    <string name="comment_field_description">Champ de texte pour vos commentaires. Actuellement, texte saisi : %1$s</string>
+    <string name="save">Enregistrer</string>
+    <string name="save_content_description">Ce bouton permet d\'enregistrer votre note et commentaire de ce produit</string>
+
+    //Detail Layout---------------------------------------------------------------------------------
+    <string name="product_not_found">Produit non trouvé</string>
+    <string name="addFavoriteClicked">Bouton cliqué, le produit est dans les favoris</string>
+    <string name="removeFavoriteClicked">Bouton cliqué, le produit est retiré des  favoris</string>
+    <string name="error_save_buton">"Merci de laisser une note et un commentaire"</string>
+    <string name="review_save">Avis enregistré avec succès"</string>
+    <string name="back">Retour</string>
+    <string name="share_product">Partager le produit</string>
+    <string name="share_by">Partager via</string>
+
+    //Detail View Model-----------------------------------------------------------------------------
+    <string name="error_retrieving_product">Erreur lors de la récupération du produit</string>
+    <string name="unable_to_favorite">Impossible de mettre en favori</string>
+    <string name="product_share_text">Découvrez ce produit : %1$s, Lien : https://www.joiefull/article%2$d.com, %3$s</string>
+    <string name="user_not_found">Utilisateur introuvable</string>
+    <string name="error_saving_review">Erreur lors de l\'enregistrement de l\'avis ou de la mise à jour de la note du produit</string>
+
+    //Home View Model-------------------------------------------------------------------------------
+    <string name="unable_to_update_product">Impossible de mettre à jour le produit</string>
+    <string name="error_retrieving_products">Erreur lors de la récupération des produits</string>
+
+    //Home Layout-----------------------------------------------------------------------------------
+    <string name="list_of_product_category">Liste des produits par catégorie</string>
+    <string name="category_products">Produits de la catégorie %1$s</string>
+
+    //Home Layout----------------------------------------------------------------------------------
+    <string name="splash_screen">Image représentant le logo de joiefull</string>
+
+
+</resources>

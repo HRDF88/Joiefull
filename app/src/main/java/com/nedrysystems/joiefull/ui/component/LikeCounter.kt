@@ -1,6 +1,5 @@
 package com.nedrysystems.joiefull.ui.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,11 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nedrysystems.joiefull.R
 
 /**
  * Displays a like counter that allows the user to toggle the like status of a product.
@@ -33,6 +35,9 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun LikeCounter(likeCount: Int, isLiked: Boolean, onLikeClick: () -> Unit, elevation: Dp = 4.dp) {
+
+    val likeCountTextContentDescription = stringResource(R.string.like_count_text, likeCount)
+
     Card(
         elevation = elevation,
         shape = RoundedCornerShape(20.dp),
@@ -46,7 +51,9 @@ fun LikeCounter(likeCount: Int, isLiked: Boolean, onLikeClick: () -> Unit, eleva
         ) {
             Icon(
                 imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = if (isLiked) "Cliquez pour Retirer des favoris" else "\"Cliquez pour Ajouter aux favoris",
+                contentDescription = if (isLiked) stringResource(R.string.removeFavorite) else stringResource(
+                    R.string.addFavorite
+                ),
                 tint = if (isLiked) Color.Red else Color.Black,
                 modifier = Modifier.size(24.dp)
             )
@@ -58,7 +65,7 @@ fun LikeCounter(likeCount: Int, isLiked: Boolean, onLikeClick: () -> Unit, eleva
                 fontSize = 16.sp,
                 color = Color.Black,
                 modifier = Modifier.semantics {
-                    contentDescription = "le nombre de likes est de ${likeCount}"
+                    contentDescription = likeCountTextContentDescription
                 }
             )
         }
