@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
@@ -31,7 +32,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,7 +65,11 @@ fun ProductCard(
     cropImage: ContentScale = ContentScale.Crop
 ) {
     // String Resources for content description
-    val pictureProductTextContentDescription = stringResource(R.string.product_image_description,product.name, product.picture.description)
+    val pictureProductTextContentDescription = stringResource(
+        R.string.product_image_description,
+        product.name,
+        product.picture.description
+    )
     val productNameTextContentDescription = stringResource(R.string.product_name_text, product.name)
     val productRateTextContentDescription =
         stringResource(R.string.product_rating, product.rate ?: 0)
@@ -79,13 +83,23 @@ fun ProductCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .wrapContentHeight(),
+            .padding(1.dp)
+            .wrapContentHeight()
+            .wrapContentWidth(),
         elevation = cardElevation,
 
 
         ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .wrapContentHeight(),
+
+
+
+        ) {
+
             // Image and like button section
             val painter = imageLoader.loadImagePainter(
                 url = product.picture.url,
@@ -99,6 +113,7 @@ fun ProductCard(
                     .width(200.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = onProductClick)
+                    .align(Alignment.CenterHorizontally)
             ) {
                 Image(
                     painter = painter,
@@ -133,43 +148,55 @@ fun ProductCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Display product name and rating
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+
+                ) {
                 Text(
                     text = product.name,
-                    textAlign = TextAlign.Start,
+                    maxLines = 1,
                     style = textStyle,
-                    modifier = Modifier.semantics {
-                        contentDescription = productNameTextContentDescription
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .semantics {
+                            contentDescription = productNameTextContentDescription
+                        }
+
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.wrapContentWidth()
+                ) {
+                    if (product.rate != null) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = null,
+                            tint = joiefullBackground,
+                            modifier = starModifier
+                                .size(14.dp)
+
+                        )
+                    } else {
+
+                        Spacer(modifier = Modifier.size(0.dp))
                     }
 
-                )
-
-                if (product.rate != null) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = joiefullBackground,
-                        modifier = starModifier
-                            .size(14.dp)
-                            .align(Alignment.Bottom)
+                    Text(
+                        text = if (product.rate != null) "${product.rate} ️" else "",
+                        style = textStyle,
+                        modifier = Modifier.semantics {
+                            contentDescription = productRateTextContentDescription
+                        },
                     )
-                } else {
-
-                    Spacer(modifier = Modifier.size(0.dp))
                 }
-
-                Text(
-                    text = if (product.rate != null) "${product.rate} ️" else "",
-                    textAlign = TextAlign.End,
-                    style = textStyle,
-                    modifier = Modifier.semantics {
-                        contentDescription = productRateTextContentDescription
-                    },
-                )
             }
+
+
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -177,6 +204,7 @@ fun ProductCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween,
 
                 ) {
                 Text(
@@ -188,7 +216,7 @@ fun ProductCard(
                     }
 
                 )
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(120.dp))
 
                 product.originalPrice?.let { originalPrice ->
                     if (originalPrice > product.price) {
@@ -207,6 +235,7 @@ fun ProductCard(
                         )
                     }
                 }
+
             }
         }
     }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -112,12 +113,17 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
         val removeFavoriteClickedTextForContentDescription =
             stringResource(R.string.removeFavoriteClicked)
 
-        Row() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxSize()
+        ) {
             // Main layout displaying products
             Column(
                 modifier = Modifier
                     .weight(if (isTablet && selectedProductId != null) 0.55f else 1f)
                     .padding(16.dp)
+                    .fillMaxSize()
             ) {
                 when {
                     uiState.isLoading -> {
@@ -130,9 +136,11 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
 
 
                         // Display the products by category
-                        LazyColumn(modifier = Modifier.semantics {
-                            contentDescription = lazyColumTextContentDescription
-                        }) {
+                        LazyColumn(modifier = Modifier
+                            .fillMaxSize()
+                            .semantics {
+                                contentDescription = lazyColumTextContentDescription
+                            }) {
                             productsGroupedByCategory.forEach { (category, products) ->
                                 item {
                                     // Display category header
@@ -154,6 +162,7 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                     LazyRow(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .fillMaxSize()
                                             .semantics {
                                                 contentDescription =
                                                     categoryTextContentDescription
@@ -197,7 +206,8 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
 
                                                 // If on tablet, close the detail layout with the updated product
                                                 if (isTablet) {
-                                                    selectedProductId = null // Close the DetailLayout
+                                                    selectedProductId =
+                                                        null // Close the DetailLayout
                                                 }
 
                                                 AccessibilityHelper.announce(
@@ -215,7 +225,7 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                                                     selectedProductId =
                                                         product.id
                                                 } else {
-                                                    navController.navigate("productDetail/${product.id}") // Navigue sur mobile
+                                                    navController.navigate("productDetail/${product.id}")
                                                 }
                                             }
 
@@ -287,9 +297,10 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
                             detailViewModel = hiltViewModel(),
                             imageLoader = imageLoader,
                             navController = navController,
-                            onSaveClick = { selectedProductId = null; viewModel.refreshProducts()
+                            onSaveClick = {
+                                selectedProductId = null; viewModel.refreshProducts()
                             },
-                            onLikeClick = {viewModel.refreshProducts()}
+                            onLikeClick = { viewModel.refreshProducts() }
                         )
                     }
                 }

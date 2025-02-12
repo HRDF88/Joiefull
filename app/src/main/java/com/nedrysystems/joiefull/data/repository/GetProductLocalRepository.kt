@@ -25,7 +25,7 @@ class GetProductLocalRepository @Inject constructor(
      */
     override suspend fun getLocalProductInfo(): List<ProductLocalInfo> {
         return productDao.getAllProductsLocalInfo()
-            .map { ProductLocalInfo(0).fromDto(it) } // Instanciation d'un objet ProductLocalInfo avant d'appeler fromDto()
+            .map { ProductLocalInfo(0).fromDto(it) }
     }
 
     /**

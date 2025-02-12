@@ -30,7 +30,9 @@ fun CategoryHeader(
         fontWeight = FontWeight.Bold,
         modifier = Modifier
             .padding(vertical = 5.dp)
-            .semantics { contentDescription = categoryTextContentDescription },
+            .semantics { contentDescription = categoryTextContentDescription }
+            .padding(4.dp),
+
 
         )
 }

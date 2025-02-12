@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.play.services.analytics.impl)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.core.ktx)
 
     // Room
     val room_version = "2.6.1"
