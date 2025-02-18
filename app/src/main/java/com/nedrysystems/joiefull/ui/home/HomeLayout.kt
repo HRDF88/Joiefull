@@ -1,9 +1,11 @@
 package com.nedrysystems.joiefull.ui.home
 
 
+import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -41,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.nedrysystems.joiefull.R
 import com.nedrysystems.joiefull.ui.component.CategoryHeader
+import com.nedrysystems.joiefull.ui.component.ErrorComponent
 import com.nedrysystems.joiefull.ui.component.ProductCard
 import com.nedrysystems.joiefull.ui.detail.DetailLayout
 import com.nedrysystems.joiefull.ui.uiModel.ProductUiModel
@@ -95,18 +101,72 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
             }
         }
 
-        uiState.errorMessage?.let { exceptionMessage ->
-            Text(
-                text = exceptionMessage,
-                color = Color.Red
-            )
-            return
-        }
 
+        uiState.errorMessage?.let { exceptionMessage ->
+
+            val retryTextContentDescription = stringResource(R.string.error_content_description)
+
+            Box(contentAlignment = Alignment.BottomCenter)
+
+            {
+                val painter = if (isTablet) {
+                    painterResource(id = R.drawable.error_tablet)
+                } else {
+                    painterResource(id = R.drawable.error_layout)
+                }
+                ErrorComponent(painter = painter)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                    val errorTextSize = if (isTablet) {
+                        48
+                    } else {
+                        24
+                    }
+                    Text(
+                        text = exceptionMessage,
+                        color = Color.Red,
+                        fontSize = errorTextSize.sp,
+                        modifier = Modifier.padding(8.dp)
+
+                    )
+
+                    val retryButtonClick: () -> Unit = {
+                        val activity = context as? Activity
+                        activity?.let {
+                            it.finish()
+                            it.startActivity(it.intent)
+                        }
+                    }
+
+                    Button(
+                        onClick = retryButtonClick,
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(36.dp)
+
+                    ) {
+                        Text(
+                            text = stringResource(R.string.retry),
+                            color = Color.White,
+                            fontSize = errorTextSize.sp,
+                            modifier = Modifier
+                                .semantics {
+                                    contentDescription = retryTextContentDescription
+                                }
+                                .padding(14.dp)
+                        )
+                    }
+                    return
+                }
+            }
+        }
         // Reload state when screen is revisited
-        LaunchedEffect(key1 = uiState.products) {
+        LaunchedEffect(key1 = uiState.products)
+        {
             viewModel.refreshProducts()
         }
+
         //Val for content Description
         val lazyColumTextContentDescription = stringResource(R.string.list_of_product_category)
         val addFavoriteClickedTextContentDescription = stringResource(R.string.addFavoriteClicked)
@@ -117,7 +177,8 @@ class HomeLayout @Inject constructor(private val imageLoader: ImageLoader) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxSize()
-        ) {
+        )
+        {
             // Main layout displaying products
             Column(
                 modifier = Modifier

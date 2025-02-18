@@ -54,9 +54,11 @@
     //Home Layout-----------------------------------------------------------------------------------
     <string name="list_of_product_category">Liste des produits par catégorie</string>
     <string name="category_products">Produits de la catégorie %1$s</string>
+    <string name="retry">Recharger</string>
 
     //Home Layout----------------------------------------------------------------------------------
     <string name="splash_screen">Image représentant le logo de joiefull</string>
+    <string name="error_content_description">Image du logo Joiefull avec un logo d\'erreur</string>
 
 
 </resources>
